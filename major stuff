@@ -1,5 +1,7 @@
 word drive
 
+comparison between yolo models - https://learnopencv.com/performance-comparison-of-yolo-models/
+
 yolov3
 yolov5 - https://docs.ultralytics.com/yolov5/train_custom_data/#comet-logging-and-visualization-new
 yolov7 - https://www.kaggle.com/code/owaiskhan9654/training-yolov7-on-kaggle-on-custom-dataset
