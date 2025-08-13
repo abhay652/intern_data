@@ -1,0 +1,69 @@
+# server_plain.py
+import socket
+
+HOST = "0.0.0.0"
+PORT = 5000
+
+# Insecure on purpose for the exercise
+USERS = {
+    "alice": "wonderland",
+    "bob": "builder",
+}
+
+def recv_line(conn):
+    data = b""
+    while not data.endswith(b"\n"):
+        chunk = conn.recv(1024)
+        if not chunk:
+            break
+        data += chunk
+    return data.decode().rstrip("\n")
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.bind((HOST, PORT))
+    s.listen(1)
+    print(f"[server] Listening on {HOST}:{PORT}")
+    while True:
+        conn, addr = s.accept()
+        with conn:
+            print(f"[server] Connected by {addr}")
+            conn.sendall(b"Username:\n")
+            username = recv_line(conn)
+            conn.sendall(b"Password:\n")
+            password = recv_line(conn)
+
+            ok = USERS.get(username) == password
+            result = "SUCCESS" if ok else "FAIL"
+            conn.sendall((result + "\n").encode())
+
+
+
+
+
+
+
+# client_plain.py
+import socket
+
+SERVER_HOST = "127.0.0.1"  # change to server IP if remote
+SERVER_PORT = 5000
+
+username = input("Username: ")
+password = input("Password: ")
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.connect((SERVER_HOST, SERVER_PORT))
+
+    # read "Username:" prompt
+    s.recv(1024)
+    s.sendall((username + "\n").encode())
+
+    # read "Password:" prompt
+    s.recv(1024)
+    s.sendall((password + "\n").encode())
+
+    # read result
+    result = s.recv(1024).decode().strip()
+    print("Server says:", result)
+
+            print(f"[server] {username=} auth={result}")
