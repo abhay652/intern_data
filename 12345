@@ -1,0 +1,91 @@
+# server_chal.py
+import socket, os, hmac, hashlib
+
+HOST = "0.0.0.0"
+PORT = 5001
+
+USERS = {
+    "alice": "wonderland",
+    "bob": "builder",
+}
+
+def recv_line(conn):
+    data = b""
+    while not data.endswith(b"\n"):
+        chunk = conn.recv(1024)
+        if not chunk:
+            break
+        data += chunk
+    return data.decode().rstrip("\n")
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.bind((HOST, PORT))
+    s.listen(1)
+    print(f"[server] Listening on {HOST}:{PORT}")
+    while True:
+        conn, addr = s.accept()
+        with conn:
+            print(f"[server] Connected by {addr}")
+
+            # 1) Ask username
+            conn.sendall(b"Username:\n")
+            username = recv_line(conn)
+
+            # 2) Make and send challenge (hex string)
+            challenge = os.urandom(16).hex()
+            conn.sendall((challenge + "\n").encode())
+
+            # 3) Receive client's response (hex digest)
+            client_digest = recv_line(conn)
+
+            # 4) Verify
+            pwd = USERS.get(username)
+            if pwd is None:
+                ok = False
+            else:
+                server_digest = hmac.new(
+                    key=pwd.encode(),
+                    msg=challenge.encode(),
+                    digestmod=hashlib.sha256
+                ).hexdigest()
+                ok = hmac.compare_digest(server_digest, client_digest)
+
+            result = "SUCCESS" if ok else "FAIL"
+            conn.sendall((result + "\n").encode())
+            print(f"[server] {username=} auth={result} challenge={challenge}")
+
+
+
+# client_chal.py
+import socket, hmac, hashlib
+
+SERVER_HOST = "127.0.0.1"
+SERVER_PORT = 5001
+
+username = input("Username: ")
+password = input("Password (kept local, not sent): ")
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.connect((SERVER_HOST, SERVER_PORT))
+
+    # read "Username:" prompt
+    s.recv(1024)
+    s.sendall((username + "\n").encode())
+
+    # receive challenge (hex)
+    challenge = s.recv(1024).decode().strip()
+
+    # compute HMAC_SHA256(secret=password, msg=challenge)
+    digest = hmac.new(
+        key=password.encode(),
+        msg=challenge.encode(),
+        digestmod=hashlib.sha256
+    ).hexdigest()
+
+    # send digest
+    s.sendall((digest + "\n").encode())
+
+    # read result
+    result = s.recv(1024).decode().strip()
+    print("Server says:", result)
+
