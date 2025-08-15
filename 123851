@@ -1,0 +1,68 @@
+Prerequisites
+
+On Server VM (Ubuntu):
+
+sudo apt update
+sudo apt install -y apache2 php libapache2-mod-php
+sudo a2enmod php*  # if needed on your image
+sudo systemctl restart apache2
+
+
+Create a tiny PHP site that uses PHP sessions (classic PHPSESSID cookie).
+
+sudo mkdir -p /var/www/html/sessionlab
+sudo nano /var/www/html/sessionlab/login.php
+
+
+Paste:
+
+<?php
+session_start();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $u = $_POST['username'] ?? '';
+  $p = $_POST['password'] ?? '';
+  // Demo only: fixed credentials for lab (shown in plaintext by design)
+  if ($u === 'student' && $p === 'password123') {
+    $_SESSION['user'] = $u;
+    header('Location: /sessionlab/protected.php');
+    exit;
+  } else {
+    $error = "Invalid login";
+  }
+}
+?>
+<!doctype html><meta charset="utf-8">
+<h2>SessionLab Login (HTTP)</h2>
+<?php if (!empty($error)) echo "<p>$error</p>"; ?>
+<form method="POST" action="/sessionlab/login.php">
+  <label>Username <input name="username"></label><br>
+  <label>Password <input name="password" type="password"></label><br>
+  <button type="submit">Login</button>
+</form>
+
+
+Create a “protected” page that requires the session:
+
+sudo nano /var/www/html/sessionlab/protected.php
+
+<?php
+session_start();
+if (!isset($_SESSION['user'])) {
+  header('Location: /sessionlab/login.php'); exit;
+}
+?>
+<!doctype html><meta charset="utf-8">
+<h2>Welcome, <?php echo htmlspecialchars($_SESSION['user']); ?></h2>
+<p>This is a protected resource served over HTTP using a session cookie.</p>
+<a href="/sessionlab/logout.php">Logout</a>
+
+
+Add a logout that clears the session:
+
+sudo nano /var/www/html/sessionlab/logout.php
+
+<?php
+session_start();
+session_unset();
+session_destroy();
+header('Location: /sessionlab/login.php');
