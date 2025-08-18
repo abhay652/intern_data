@@ -1,0 +1,45 @@
+package edu.demo;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+@WebServlet("/validate")
+public class HarvestServlet extends HttpServlet {
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+
+        out.println("<h2>Captured Credentials</h2>");
+        out.println("<p><b>Username:</b> " + username + "</p>");
+        out.println("<p><b>Password:</b> " + password + "</p>");
+    }
+}
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Harvest App</title>
+</head>
+<body>
+  <h3>Attacker Site</h3>
+  <form method="post" action="validate">
+    <label>Username:</label><input type="text" name="username"><br>
+    <label>Password:</label><input type="password" name="password"><br>
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
